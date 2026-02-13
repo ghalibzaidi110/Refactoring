@@ -187,10 +187,37 @@ mypy app/
 
 ## Deployment
 
-### Using uvicorn
+### Deploying to Render
+
+1. **Push your code to GitHub/GitLab**
+
+2. **Create a new Web Service on Render**
+   - Go to [Render Dashboard](https://dashboard.render.com/)
+   - Click "New +" and select "Web Service"
+   - Connect your repository
+
+3. **Configure the service**
+   - **Name**: refactorgpt (or your preferred name)
+   - **Environment**: Python
+   - **Build Command**: `./build.sh`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Python Version**: 3.11.0 (specified in runtime.txt)
+
+4. **Set environment variables**
+   - Add `OPENAI_API_KEY` with your OpenAI API key
+   - Add `GOOGLE_API_KEY` with your Google AI API key (optional)
+   
+5. **Deploy**
+   - Click "Create Web Service"
+   - Render will automatically build and deploy your app
+
+**Note**: The app uses `render.yaml` for automatic configuration. You can also use the Render Blueprint feature by committing this file.
+
+### Using uvicorn (Manual Deployment)
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+# For production with multiple workers
+uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 4
 ```
 
 ### Using Docker
@@ -203,9 +230,29 @@ docker build -t refactorgpt .
 docker run -p 8000:8000 --env-file .env refactorgpt
 ```
 
-### Using Render/Heroku
+### Using Heroku
 
-The application includes a `Procfile` for easy deployment to platforms like Render or Heroku.
+```bash
+# Login to Heroku
+heroku login
+
+# Create app
+heroku create your-app-name
+
+# Set environment variables
+heroku config:set OPENAI_API_KEY=your_key_here
+heroku config:set GOOGLE_API_KEY=your_key_here
+
+# Deploy
+git push heroku main
+```
+
+### Environment Variables for Production
+
+Make sure to set these in your deployment platform:
+- `OPENAI_API_KEY` - Required for OpenAI GPT refactoring
+- `GOOGLE_API_KEY` - Optional, for Google Gemini refactoring
+- `PORT` - Automatically set by most platforms (Render, Heroku, etc.)
 
 ## Tech Stack
 
