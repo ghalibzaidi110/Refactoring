@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefactorGPT - AI-Powered Python Code Refactoring</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RefactorGPT</h1>
+            <p class="subtitle">AI-powered Python code refactoring - Paste your code, click refactor, and see the improved version</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Left panel - Original Code (Editable) -->
+            <div class="code-panel">
+                <div class="panel-header">
+                    <h2>Original Code (Editable)</h2>
+                    <button class="btn-secondary" onclick="clearInput()">Clear</button>
+                </div>
+                <div class="code-wrapper">
+                    <pre><code id="originalCodeHighlight" class="language-python"></code></pre>
+                    <textarea 
+                        id="originalCode" 
+                        class="code-textarea"
+                        placeholder="# Paste your Python code here&#10;# Example:&#10;def example_function(x, y):&#10;    result = x + y&#10;    return result"
+                        spellcheck="false"
+                        oninput="updateHighlight('originalCode', 'originalCodeHighlight')"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Right panel - Refactored Code (Read-only) -->
+            <div class="code-panel">
+                <div class="panel-header">
+                    <h2>Refactored Code (Read-Only)</h2>
+                    <button class="btn-secondary" onclick="copyToClipboard()">Copy</button>
+                </div>
+                <div class="code-wrapper">
+                    <pre><code id="refactoredCodeHighlight" class="language-python"></code></pre>
+                    <textarea 
+                        id="refactoredCode" 
+                        class="code-textarea" 
+                        readonly
+                        placeholder="Refactored code will appear here..."
+                    ></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="button-container">
+            <button id="refactorBtn" class="btn-primary" onclick="refactorCode()">
+                <span class="btn-text">Refactor Code</span>
+                <span class="spinner" style="display: none;">Processing...</span>
+            </button>
+        </div>
+
+        <!-- Status message area -->
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
