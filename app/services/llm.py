@@ -35,97 +35,124 @@ class LLMRefactorer:
             else:
                 self.model = None
     
-    def _create_prompt(self, code: str) -> str:
-        """Create refactoring prompt for LLM"""
-        return f"""You are an expert Python developer. Refactor the following Python code to improve:
-- Code readability and clarity
-- Performance and efficiency
-- Following Python best practices (PEP 8)
-- Adding helpful docstrings and comments where needed
-- Removing code smells and anti-patterns
+    def _create_prompt(self, code: str, language: str = "python") -> str:
+        """Create OOP-focused architectural refactoring prompt for LLM"""
+        lang_display = language.capitalize()
+        return f"""You are an expert software architect and {lang_display} developer specializing in OOP design patterns and clean architecture.
 
-Original code:
-```python
+Refactor the following {lang_display} code by applying the appropriate OOP principles and design patterns listed below.
+
+OOP Principles to enforce:
+- Encapsulation: bundle data with its methods; restrict direct field access
+- Inheritance: extract common behavior into base/abstract classes
+- Polymorphism: use method overriding and interfaces/abstract methods
+- Abstraction: hide implementation details behind clean interfaces
+
+Design Patterns to apply where relevant:
+- Singleton: for classes representing a single shared resource (DB connection, config, logger)
+- Factory: centralize object creation; avoid direct instantiation of concrete classes
+- Observer: decouple event producers from consumers using Subject/Observer interfaces
+- MVC: separate data (Model), business logic (Controller), and presentation (View)
+
+Also fix these architectural smells:
+- Duplicate code — extract into shared methods or a base class
+- Large classes (God Objects) — split into smaller, single-responsibility classes
+- Tight coupling — use dependency injection or interfaces
+- Global variables — encapsulate inside classes
+- Missing docstrings — add clear documentation
+
+Original {lang_display} code:
+```{language}
 {code}
 ```
 
-Provide ONLY the refactored code without any explanations. Return only valid Python code."""
+Provide ONLY the refactored code without any explanations or commentary.
+Return only valid {lang_display} code."""
 
-    def refactor_with_openai(self, code: str) -> Tuple[str, list[str]]:
-        """Refactor code using OpenAI GPT"""
+    def refactor_with_openai(self, code: str, language: str = "python") -> Tuple[str, list[str]]:
+        """Refactor code using OpenAI GPT with OOP-focused architectural improvements"""
         if not self.client:
             return code, ["OpenAI API key not configured"]
-        
+
         try:
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are an expert Python refactoring assistant."},
-                    {"role": "user", "content": self._create_prompt(code)}
+                    {
+                        "role": "system",
+                        "content": (
+                            f"You are an expert {language.capitalize()} software architect "
+                            f"specializing in OOP design patterns (Singleton, Factory, Observer, MVC) "
+                            f"and clean code principles."
+                        ),
+                    },
+                    {"role": "user", "content": self._create_prompt(code, language)},
                 ],
                 temperature=0.3,
-                max_tokens=2000
+                max_tokens=3000,
             )
-            
+
             refactored = response.choices[0].message.content.strip()
-            
-            # Clean up markdown code blocks if present
-            if refactored.startswith("```python"):
-                refactored = refactored.split("```python")[1].split("```")[0].strip()
-            elif refactored.startswith("```"):
-                refactored = refactored.split("```")[1].split("```")[0].strip()
-            
+
+            # Strip markdown code fences if present
+            refactored = self._strip_code_fences(refactored, language)
+
             improvements = [
-                "Applied AI-powered refactoring",
-                "Improved code structure and readability",
-                "Enhanced with best practices"
+                "Applied OOP principles (Encapsulation, Inheritance, Polymorphism, Abstraction)",
+                "Applied relevant design patterns (Singleton / Factory / Observer / MVC)",
+                "Eliminated code smells and improved architecture",
             ]
-            
+
             return refactored, improvements
-            
+
         except Exception as e:
             return code, [f"OpenAI refactoring error: {str(e)}"]
     
-    def refactor_with_google(self, code: str) -> Tuple[str, list[str]]:
-        """Refactor code using Google Gemini"""
+    @staticmethod
+    def _strip_code_fences(text: str, language: str = "python") -> str:
+        """Remove markdown code fences from LLM output"""
+        fence_lang = f"```{language}"
+        if text.startswith(fence_lang):
+            text = text[len(fence_lang):].split("```")[0].strip()
+        elif text.startswith("```"):
+            text = text[3:].split("```")[0].strip()
+        return text
+
+    def refactor_with_google(self, code: str, language: str = "python") -> Tuple[str, list[str]]:
+        """Refactor code using Google Gemini with OOP-focused architectural improvements"""
         if not self.model:
             return code, ["Google API key not configured"]
-        
+
         try:
-            response = self.model.generate_content(self._create_prompt(code))
-            refactored = response.text.strip()
-            
-            # Clean up markdown code blocks if present
-            if refactored.startswith("```python"):
-                refactored = refactored.split("```python")[1].split("```")[0].strip()
-            elif refactored.startswith("```"):
-                refactored = refactored.split("```")[1].split("```")[0].strip()
-            
+            response = self.model.generate_content(self._create_prompt(code, language))
+            refactored = self._strip_code_fences(response.text.strip(), language)
+
             improvements = [
-                "Applied AI-powered refactoring with Gemini",
-                "Improved code structure and readability",
-                "Enhanced with best practices"
+                "Applied OOP principles via Gemini (Encapsulation, Inheritance, Polymorphism, Abstraction)",
+                "Applied relevant design patterns (Singleton / Factory / Observer / MVC)",
+                "Eliminated code smells and improved architecture",
             ]
-            
+
             return refactored, improvements
-            
+
         except Exception as e:
             return code, [f"Google AI refactoring error: {str(e)}"]
     
-    def refactor(self, code: str) -> Tuple[str, list[str]]:
+    def refactor(self, code: str, language: str = "python") -> Tuple[str, list[str]]:
         """
-        Refactor code using configured LLM provider
-        
+        Refactor code using the configured LLM provider.
+
         Args:
-            code: Python code to refactor
-        
+            code: Source code to refactor
+            language: Programming language ('python' or 'java')
+
         Returns:
             Tuple of (refactored_code, improvements_list)
         """
         if self.provider == "openai":
-            return self.refactor_with_openai(code)
+            return self.refactor_with_openai(code, language)
         elif self.provider == "google":
-            return self.refactor_with_google(code)
+            return self.refactor_with_google(code, language)
         else:
             return code, ["Unknown LLM provider"]
 
@@ -142,16 +169,19 @@ def get_refactorer(provider: str = "openai") -> LLMRefactorer:
     return _refactorer
 
 
-def refactor_with_llm(code: str, provider: str = "openai") -> Tuple[str, list[str]]:
+def refactor_with_llm(
+    code: str, provider: str = "openai", language: str = "python"
+) -> Tuple[str, list[str]]:
     """
-    Convenience function to refactor code with LLM
-    
+    Convenience function to refactor code with LLM using OOP-focused prompting.
+
     Args:
-        code: Python code to refactor
+        code: Source code to refactor
         provider: LLM provider ('openai' or 'google')
-    
+        language: Programming language ('python' or 'java')
+
     Returns:
         Tuple of (refactored_code, improvements_list)
     """
     refactorer = get_refactorer(provider)
-    return refactorer.refactor(code)
+    return refactorer.refactor(code, language)

@@ -3,30 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RefactorGPT - AI-Powered Python Code Refactoring</title>
+    <title>Architex.ai - Automated Architectural Refactoring</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>RefactorGPT</h1>
-            <p class="subtitle">AI-powered Python code refactoring - Paste your code, click refactor, and see the improved version</p>
+            <h1>Architex.ai</h1>
+            <p class="subtitle">Automated Architectural Refactoring via LLM-Driven OOP Patterns &mdash; Python &amp; Java</p>
         </header>
+
+        <!-- Language selector + controls -->
+        <div class="controls-bar">
+            <div class="language-selector">
+                <label for="languageSelect">Language:</label>
+                <select id="languageSelect" onchange="onLanguageChange()">
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                </select>
+            </div>
+            <div class="llm-toggle">
+                <label>
+                    <input type="checkbox" id="useLlm" checked>
+                    AI OOP Refactoring (LLM)
+                </label>
+            </div>
+        </div>
 
         <div class="main-content">
             <!-- Left panel - Original Code (Editable) -->
             <div class="code-panel">
                 <div class="panel-header">
-                    <h2>Original Code (Editable)</h2>
+                    <h2>Original Code</h2>
                     <button class="btn-secondary" onclick="clearInput()">Clear</button>
                 </div>
                 <div class="code-wrapper">
                     <pre><code id="originalCodeHighlight" class="language-python"></code></pre>
-                    <textarea 
-                        id="originalCode" 
+                    <textarea
+                        id="originalCode"
                         class="code-textarea"
-                        placeholder="# Paste your Python code here&#10;# Example:&#10;def example_function(x, y):&#10;    result = x + y&#10;    return result"
+                        placeholder="# Paste your Python or Java code here..."
                         spellcheck="false"
                         oninput="updateHighlight('originalCode', 'originalCodeHighlight')"
                     ></textarea>
@@ -36,14 +53,14 @@
             <!-- Right panel - Refactored Code (Read-only) -->
             <div class="code-panel">
                 <div class="panel-header">
-                    <h2>Refactored Code (Read-Only)</h2>
+                    <h2>Refactored Code</h2>
                     <button class="btn-secondary" onclick="copyToClipboard()">Copy</button>
                 </div>
                 <div class="code-wrapper">
                     <pre><code id="refactoredCodeHighlight" class="language-python"></code></pre>
-                    <textarea 
-                        id="refactoredCode" 
-                        class="code-textarea" 
+                    <textarea
+                        id="refactoredCode"
+                        class="code-textarea"
                         readonly
                         placeholder="Refactored code will appear here..."
                     ></textarea>
@@ -54,13 +71,45 @@
         <!-- Action buttons -->
         <div class="button-container">
             <button id="refactorBtn" class="btn-primary" onclick="refactorCode()">
-                <span class="btn-text">Refactor Code</span>
-                <span class="spinner" style="display: none;">Processing...</span>
+                <span class="btn-text">&#9654; Refactor Code</span>
+                <span class="spinner" style="display: none;">Analyzing &amp; Refactoring...</span>
             </button>
         </div>
 
         <!-- Status message area -->
         <div id="statusMessage" class="status-message"></div>
+
+        <!-- Report section (hidden until results arrive) -->
+        <div id="reportSection" class="report-section" style="display:none;">
+
+            <!-- Detected Smells -->
+            <div class="report-panel smells-panel">
+                <div class="report-panel-header">
+                    <span class="report-icon">&#9888;</span>
+                    <h3>Detected Architectural Smells</h3>
+                </div>
+                <ul id="smellsList" class="report-list"></ul>
+            </div>
+
+            <!-- Suggested Design Patterns -->
+            <div class="report-panel patterns-panel">
+                <div class="report-panel-header">
+                    <span class="report-icon">&#10024;</span>
+                    <h3>Suggested OOP Design Patterns</h3>
+                </div>
+                <ul id="patternsList" class="report-list"></ul>
+            </div>
+
+            <!-- Improvements Applied -->
+            <div class="report-panel improvements-panel">
+                <div class="report-panel-header">
+                    <span class="report-icon">&#10003;</span>
+                    <h3>Improvements Applied</h3>
+                </div>
+                <ul id="improvementsList" class="report-list"></ul>
+            </div>
+
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>

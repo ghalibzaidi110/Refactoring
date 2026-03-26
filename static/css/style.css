@@ -243,3 +243,156 @@ h1 {
         font-size: 0.9em;
     }
 }
+
+/* ── Controls bar (language selector + LLM toggle) ── */
+.controls-bar {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 20px;
+    padding: 12px 18px;
+    background: #1e1e1c;
+    border: 1px solid #3e3d32;
+    border-radius: 8px;
+    flex-wrap: wrap;
+}
+
+.language-selector label,
+.llm-toggle label {
+    color: #a6a6a6;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.language-selector select {
+    background: #3e3d32;
+    color: #f8f8f2;
+    border: 1px solid #5a5a4a;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 0.95em;
+    cursor: pointer;
+    outline: none;
+}
+
+.language-selector select:focus {
+    border-color: #66d9ef;
+}
+
+.llm-toggle input[type="checkbox"] {
+    accent-color: #66d9ef;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* ── Report section ── */
+.report-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+@media (max-width: 1024px) {
+    .report-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+.report-panel {
+    border-radius: 8px;
+    border: 1px solid #3e3d32;
+    overflow: hidden;
+}
+
+.report-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+.report-panel-header h3 {
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+.report-icon {
+    font-size: 1.1em;
+}
+
+/* Smells panel — warm red tint */
+.smells-panel {
+    background: #2a1f1f;
+    border-color: #5c3232;
+}
+.smells-panel .report-panel-header {
+    background: #3a2020;
+    color: #f92672;
+}
+
+/* Patterns panel — blue tint */
+.patterns-panel {
+    background: #1a2030;
+    border-color: #2c4060;
+}
+.patterns-panel .report-panel-header {
+    background: #1e2a40;
+    color: #66d9ef;
+}
+
+/* Improvements panel — green tint */
+.improvements-panel {
+    background: #1a2a1a;
+    border-color: #2c5030;
+}
+.improvements-panel .report-panel-header {
+    background: #1e3020;
+    color: #a6e22e;
+}
+
+/* Report list */
+.report-list {
+    list-style: none;
+    padding: 12px 16px;
+    margin: 0;
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.report-item {
+    font-size: 0.85em;
+    line-height: 1.5;
+    color: #d4d4c8;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    border-left: 3px solid rgba(255,255,255,0.1);
+}
+
+.report-item--none {
+    color: #5a5a5a;
+    font-style: italic;
+    background: transparent;
+    border-left-color: transparent;
+}
+
+.smells-panel .report-item {
+    border-left-color: #f92672;
+}
+.patterns-panel .report-item {
+    border-left-color: #66d9ef;
+}
+.improvements-panel .report-item {
+    border-left-color: #a6e22e;
+}
+

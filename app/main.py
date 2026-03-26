@@ -50,7 +50,8 @@ async def refactor_endpoint(request: RefactorRequest):
         result = refactor_code(
             code=request.code,
             use_llm=request.use_llm if request.use_llm is not None else True,
-            llm_provider="openai"
+            llm_provider="openai",
+            language=request.language or "python",
         )
         return RefactorResponse(**result)
     except Exception as e:

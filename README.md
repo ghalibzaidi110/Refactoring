@@ -1,15 +1,22 @@
-# RefactorGPT
 
-AI-powered Python code refactoring tool with web UI and REST API. Automatically improves code quality using Black formatting and LLM-based intelligent refactoring.
+# Architex.ai
+
+Automated Architectural Refactoring for Python & Java
+
+---
+
+**Architex.ai** is an AI-powered tool that analyzes and refactors your Python or Java code, applying OOP principles, design patterns, and fixing architectural smells. It features a modern web UI and a REST API for programmatic access.
 
 ## Features
 
-- **Web UI**: Beautiful dark-themed interface with syntax highlighting
-- **REST API**: FastAPI-based API for programmatic access
-- **AI-Powered**: Uses OpenAI GPT or Google Gemini for intelligent refactoring
-- **Code Formatting**: Automatic formatting with Black or autopep8
-- **Quality Analysis**: Built-in code quality suggestions
-- **Dual Editors**: Side-by-side editable input and read-only output
+- **Web UI**: Modern, dark-themed, with syntax highlighting and side-by-side editors
+- **Language Support**: Python and Java
+- **OOP & Design Patterns**: Detects and applies Singleton, Factory, Observer, MVC, and more
+- **Architectural Smell Detection**: Finds large classes, duplicate code, tight coupling, missing docstrings, and more
+- **AI-Powered Refactoring**: Uses OpenAI GPT or Google Gemini to rewrite code with OOP best practices
+- **Static Analysis**: Integrates Black, autopep8, pylint, and radon for formatting and quality
+- **Full Report**: Returns detected smells, suggested patterns, and all improvements
+- **REST API**: FastAPI backend for automation and integration
 
 ## Quick Start
 
@@ -17,7 +24,7 @@ AI-powered Python code refactoring tool with web UI and REST API. Automatically 
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+
 cd refactorgpt
 
 # Create and activate virtual environment
@@ -58,6 +65,18 @@ Access the application:
 - API Docs: http://localhost:8000/docs
 - Health Check: http://localhost:8000/health
 
+---
+
+## How It Works
+
+1. **Parsing**: Analyzes code structure (AST for Python, regex for Java)
+2. **Smell Detection**: Finds large classes, duplicate code, tight coupling, missing OOP, etc.
+3. **Static Analysis**: Runs Black, autopep8, pylint, and radon (Python only)
+4. **OOP Refactoring**: LLM rewrites code to apply OOP principles and design patterns
+5. **Full Report**: Returns refactored code, detected smells, suggested patterns, and all improvements
+
+---
+
 ## API Usage
 
 ### Refactor Code Endpoint
@@ -67,8 +86,8 @@ Access the application:
 Request body:
 ```json
 {
-  "code": "def hello():\n    print('Hello, World!')",
-  "language": "python",
+  "code": "public class Hello { public static void main(String[] args) { System.out.println(\"Hello, World!\"); } }",
+  "language": "java",
   "use_llm": true
 }
 ```
@@ -76,14 +95,21 @@ Request body:
 Response:
 ```json
 {
-  "summary": "Code refactored with 5 improvements",
-  "refactored_code": "def hello():\n    \"\"\"Print a greeting message.\"\"\"\n    print(\"Hello, World!\")",
+  "summary": "Code refactored with 7 improvements",
+  "refactored_code": "...refactored code...",
   "improvements": [
-    "Applied Black formatting for consistent style",
-    "Fixed indentation and spacing",
-    "Applied AI-powered refactoring",
-    "Improved code structure and readability",
-    "Enhanced with best practices"
+    "Applied OOP principles (Encapsulation, Inheritance, ...)",
+    "Applied Singleton pattern",
+    "Eliminated duplicate code",
+    "..."
+  ],
+  "detected_smells": [
+    "Large class (God Object): ...",
+    "Duplicate code: ..."
+  ],
+  "suggested_patterns": [
+    "Factory pattern: ...",
+    "Observer pattern: ..."
   ]
 }
 ```
@@ -94,11 +120,11 @@ Response:
 curl -X POST "http://localhost:8000/api/refactor" \
   -H "Content-Type: application/json" \
   -d '{
-    "code": "def add(x,y):\n  return x+y",
+    "code": "public class Hello { ... }",
+    "language": "java",
     "use_llm": true
   }'
 ```
-
 ### Python Example
 
 ```python

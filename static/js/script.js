@@ -4,66 +4,98 @@
 function updateHighlight(textareaId, highlightId) {
     const textarea = document.getElementById(textareaId);
     const highlight = document.getElementById(highlightId);
-    const code = textarea.value;
-    
-    highlight.textContent = code;
+    highlight.textContent = textarea.value;
     hljs.highlightElement(highlight);
 }
 
 /**
- * Refactor code by sending it to the Flask backend
- * 
- * TODO: This is where the refactoring happens
- * The function sends the original code to the /refactor endpoint
- * and displays the refactored code in the output textarea
+ * When language changes, update highlight language class on both editors
+ */
+function onLanguageChange() {
+    const lang = document.getElementById('languageSelect').value;
+    const hlLang = lang === 'java' ? 'language-java' : 'language-python';
+    ['originalCodeHighlight', 'refactoredCodeHighlight'].forEach(id => {
+        const el = document.getElementById(id);
+        el.className = hlLang;
+        hljs.highlightElement(el);
+    });
+}
+
+/**
+ * Populate a report list (<ul>) with items, or show a "none" message
+ */
+function populateList(ulId, items) {
+    const ul = document.getElementById(ulId);
+    ul.innerHTML = '';
+    if (!items || items.length === 0) {
+        const li = document.createElement('li');
+        li.className = 'report-item report-item--none';
+        li.textContent = 'None detected';
+        ul.appendChild(li);
+        return;
+    }
+    items.forEach(text => {
+        const li = document.createElement('li');
+        li.className = 'report-item';
+        li.textContent = text;
+        ul.appendChild(li);
+    });
+}
+
+/**
+ * Main refactor function — sends code + language to /refactor and
+ * renders the full architectural report (smells, patterns, improvements)
  */
 async function refactorCode() {
     const originalCode = document.getElementById('originalCode').value.trim();
+    const language = document.getElementById('languageSelect').value;
+    const useLlm = document.getElementById('useLlm').checked;
     const refactorBtn = document.getElementById('refactorBtn');
     const btnText = refactorBtn.querySelector('.btn-text');
     const spinner = refactorBtn.querySelector('.spinner');
     const statusMessage = document.getElementById('statusMessage');
-    
-    // Validate input
+
     if (!originalCode) {
         showStatus('Please enter some code to refactor!', 'error');
         return;
     }
-    
-    // Disable button and show loading state
+
+    // Loading state
     refactorBtn.disabled = true;
     btnText.style.display = 'none';
     spinner.style.display = 'inline-block';
     statusMessage.style.display = 'none';
-    
+    document.getElementById('reportSection').style.display = 'none';
+
     try {
-        // Send POST request to /refactor endpoint
         const response = await fetch('/refactor', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ code: originalCode })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: originalCode, language: language, use_llm: useLlm })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
-            // Success - display refactored code
+            // Show refactored code
             document.getElementById('refactoredCode').value = data.refactored_code;
             updateHighlight('refactoredCode', 'refactoredCodeHighlight');
-            showStatus('Code refactored successfully!', 'success');
+
+            // Populate report panels
+            populateList('smellsList', data.detected_smells);
+            populateList('patternsList', data.suggested_patterns);
+            populateList('improvementsList', data.improvements);
+            document.getElementById('reportSection').style.display = 'grid';
+
+            showStatus(`\u2713 ${data.summary}`, 'success');
         } else {
-            // Error from server
-            showStatus(`Error: ${data.error || 'Unknown error occurred'}`, 'error');
+            showStatus(`Error: ${data.detail || data.error || 'Unknown error occurred'}`, 'error');
         }
-        
+
     } catch (error) {
-        // Network or other error
         showStatus(`Error: ${error.message}`, 'error');
         console.error('Error:', error);
     } finally {
-        // Re-enable button
         refactorBtn.disabled = false;
         btnText.style.display = 'inline';
         spinner.style.display = 'none';
@@ -71,11 +103,12 @@ async function refactorCode() {
 }
 
 /**
- * Clear the input textarea
+ * Clear the input textarea and report
  */
 function clearInput() {
     document.getElementById('originalCode').value = '';
     document.getElementById('originalCodeHighlight').textContent = '';
+    document.getElementById('reportSection').style.display = 'none';
     document.getElementById('statusMessage').style.display = 'none';
 }
 
@@ -84,17 +117,14 @@ function clearInput() {
  */
 async function copyToClipboard() {
     const refactoredCode = document.getElementById('refactoredCode').value;
-    
     if (!refactoredCode.trim()) {
         showStatus('No refactored code to copy!', 'error');
         return;
     }
-    
     try {
         await navigator.clipboard.writeText(refactoredCode);
         showStatus('Code copied to clipboard!', 'success');
-    } catch (error) {
-        // Fallback for older browsers
+    } catch {
         const textarea = document.getElementById('refactoredCode');
         textarea.select();
         document.execCommand('copy');
@@ -103,25 +133,19 @@ async function copyToClipboard() {
 }
 
 /**
- * Show status message to user
- * @param {string} message - Message to display
- * @param {string} type - Type of message: 'success', 'error', or 'info'
+ * Show status message
  */
 function showStatus(message, type) {
     const statusMessage = document.getElementById('statusMessage');
     statusMessage.textContent = message;
     statusMessage.className = `status-message ${type}`;
     statusMessage.style.display = 'block';
-    
-    // Auto-hide success messages after 3 seconds
     if (type === 'success') {
-        setTimeout(() => {
-            statusMessage.style.display = 'none';
-        }, 3000);
+        setTimeout(() => { statusMessage.style.display = 'none'; }, 4000);
     }
 }
 
-// Allow Ctrl+Enter to trigger refactoring
+// Ctrl+Enter shortcut
 document.getElementById('originalCode').addEventListener('keydown', function(event) {
     if (event.ctrlKey && event.key === 'Enter') {
         event.preventDefault();
@@ -129,13 +153,14 @@ document.getElementById('originalCode').addEventListener('keydown', function(eve
     }
 });
 
-// Sync scroll between textarea and highlight
+// Sync scroll between textarea and highlight overlay
 document.getElementById('originalCode').addEventListener('scroll', function() {
-    const highlight = document.getElementById('originalCodeHighlight');
-    highlight.style.transform = `translate(-${this.scrollLeft}px, -${this.scrollTop}px)`;
+    document.getElementById('originalCodeHighlight').style.transform =
+        `translate(-${this.scrollLeft}px, -${this.scrollTop}px)`;
 });
 
 document.getElementById('refactoredCode').addEventListener('scroll', function() {
-    const highlight = document.getElementById('refactoredCodeHighlight');
-    highlight.style.transform = `translate(-${this.scrollLeft}px, -${this.scrollTop}px)`;
+    document.getElementById('refactoredCodeHighlight').style.transform =
+        `translate(-${this.scrollLeft}px, -${this.scrollTop}px)`;
 });
+
