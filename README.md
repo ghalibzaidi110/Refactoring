@@ -18,62 +18,101 @@ Automated Architectural Refactoring for Python & Java
 - **Full Report**: Returns detected smells, suggested patterns, and all improvements
 - **REST API**: FastAPI backend for automation and integration
 
+---
+
 ## Quick Start
 
-### 1. Installation
+### 1. Clone the Repository
 
 ```bash
-# Clone the repository
-
+git clone https://github.com/your-username/refactorgpt.git
 cd refactorgpt
+```
 
-# Create and activate virtual environment
+### 2. Create a Virtual Environment
+
+```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-# Install dependencies
+**Activate the virtual environment:**
+
+- **Windows (PowerShell):**
+  ```bash
+  venv\Scripts\activate
+  ```
+- **Windows (CMD):**
+  ```bash
+  venv\Scripts\activate.bat
+  ```
+- **macOS / Linux:**
+  ```bash
+  source venv/bin/activate
+  ```
+
+> **Troubleshooting:** If you get an error like `Unable to copy venvlauncher.exe` (common with Python 3.14), try:
+> ```bash
+> python -m venv venv --without-pip
+> ```
+> Then activate the venv and install pip manually:
+> ```bash
+> venv\Scripts\activate
+> python -m ensurepip --upgrade
+> ```
+> Alternatively, use `virtualenv`:
+> ```bash
+> pip install virtualenv
+> virtualenv venv
+> ```
+
+### 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configuration
+### 4. Configure Environment Variables
 
-Copy `.env.example` to `.env` and add your API keys:
+Copy the example env file and add your API keys:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and add your API keys:
+Edit `.env` and fill in your keys:
+
 ```
 OPENAI_API_KEY=your_openai_api_key_here
 GOOGLE_API_KEY=your_google_api_key_here
 ```
 
 Get API keys from:
-- OpenAI: https://platform.openai.com/api-keys
-- Google AI: https://makersuite.google.com/app/apikey
+- **OpenAI:** https://platform.openai.com/api-keys
+- **Google AI:** https://makersuite.google.com/app/apikey
 
-### 3. Run the Application
+### 5. Run the Application
 
 ```bash
-# Start the FastAPI server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload
 ```
 
-Access the application:
-- Web UI: http://localhost:8000
-- API Docs: http://localhost:8000/docs
-- Health Check: http://localhost:8000/health
+The app will start at **http://127.0.0.1:8000**.
+
+| URL | Description |
+|-----|-------------|
+| http://127.0.0.1:8000 | Web UI |
+| http://127.0.0.1:8000/docs | API Documentation (Swagger) |
+| http://127.0.0.1:8000/health | Health Check |
 
 ---
 
 ## How It Works
 
-1. **Parsing**: Analyzes code structure (AST for Python, regex for Java)
-2. **Smell Detection**: Finds large classes, duplicate code, tight coupling, missing OOP, etc.
-3. **Static Analysis**: Runs Black, autopep8, pylint, and radon (Python only)
-4. **OOP Refactoring**: LLM rewrites code to apply OOP principles and design patterns
-5. **Full Report**: Returns refactored code, detected smells, suggested patterns, and all improvements
+1. **Parsing** - Analyzes code structure (AST for Python, regex for Java)
+2. **Smell Detection** - Finds large classes, duplicate code, tight coupling, missing OOP, etc.
+3. **Static Analysis** - Runs Black, autopep8, pylint, and radon (Python only)
+4. **OOP Refactoring** - LLM rewrites code to apply OOP principles and design patterns
+5. **Full Report** - Returns refactored code, detected smells, suggested patterns, and all improvements
 
 ---
 
@@ -100,8 +139,7 @@ Response:
   "improvements": [
     "Applied OOP principles (Encapsulation, Inheritance, ...)",
     "Applied Singleton pattern",
-    "Eliminated duplicate code",
-    "..."
+    "Eliminated duplicate code"
   ],
   "detected_smells": [
     "Large class (God Object): ...",
@@ -125,6 +163,7 @@ curl -X POST "http://localhost:8000/api/refactor" \
     "use_llm": true
   }'
 ```
+
 ### Python Example
 
 ```python
@@ -142,6 +181,8 @@ result = response.json()
 print(result["refactored_code"])
 ```
 
+---
+
 ## Project Structure
 
 ```
@@ -156,39 +197,50 @@ refactorgpt/
 │   └── services/
 │       ├── __init__.py
 │       ├── formatter.py     # Code formatting with Black/autopep8
-│       ├── llm.py          # LLM integration (OpenAI/Google)
-│       └── refactor.py     # Main refactoring orchestration
-├── static/                  # Static assets (CSS, JS)
-├── templates/               # HTML templates
+│       ├── llm.py           # LLM integration (OpenAI/Google)
+│       ├── parser.py        # Code parsing and AST analysis
+│       └── refactor.py      # Main refactoring orchestration
+├── static/
+│   ├── css/
+│   │   └── style.css        # Application styles
+│   └── js/
+│       └── script.js        # Frontend logic
+├── templates/
+│   └── index.html           # Web UI template
 ├── requirements.txt         # Python dependencies
-├── .env.example            # Environment variables template
-└── README.md               # This file
+├── .env.example             # Environment variables template
+└── README.md                # This file
 ```
+
+---
 
 ## Configuration Options
 
 ### Environment Variables
 
-- `OPENAI_API_KEY`: OpenAI API key for GPT models
-- `GOOGLE_API_KEY`: Google AI API key for Gemini models
-- `DEFAULT_LLM_PROVIDER`: Default LLM provider (openai/google)
-- `DEBUG`: Enable debug mode (True/False)
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `OPENAI_API_KEY` | OpenAI API key for GPT models | Yes (if using OpenAI) |
+| `GOOGLE_API_KEY` | Google AI API key for Gemini models | Optional |
+| `DEFAULT_LLM_PROVIDER` | Default LLM provider (`openai` or `google`) | Optional |
+| `DEBUG` | Enable debug mode (`True`/`False`) | Optional |
 
 ### LLM Providers
 
 The application supports two LLM providers:
 
-1. **OpenAI** (default): Uses GPT-4-mini for refactoring
-2. **Google Gemini**: Uses gemini-pro model
+1. **OpenAI** (default) - Uses GPT-4-mini for refactoring
+2. **Google Gemini** - Uses gemini-pro model
 
 You can configure the provider in the request or set a default in `.env`.
+
+---
 
 ## Development
 
 ### Running Tests
 
 ```bash
-# Install test dependencies
 pip install pytest pytest-cov
 
 # Run tests
@@ -211,80 +263,46 @@ pylint app/
 mypy app/
 ```
 
+---
+
 ## Deployment
 
 ### Deploying to Render
 
-1. **Push your code to GitHub/GitLab**
-
-2. **Create a new Web Service on Render**
-   - Go to [Render Dashboard](https://dashboard.render.com/)
-   - Click "New +" and select "Web Service"
-   - Connect your repository
-
-3. **Configure the service**
-   - **Name**: refactorgpt (or your preferred name)
-   - **Environment**: Python
-   - **Build Command**: `./build.sh`
-   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-   - **Python Version**: 3.11.0 (specified in runtime.txt)
-
-4. **Set environment variables**
-   - Add `OPENAI_API_KEY` with your OpenAI API key
-   - Add `GOOGLE_API_KEY` with your Google AI API key (optional)
-   
-5. **Deploy**
-   - Click "Create Web Service"
-   - Render will automatically build and deploy your app
-
-**Note**: The app uses `render.yaml` for automatic configuration. You can also use the Render Blueprint feature by committing this file.
-
-### Using uvicorn (Manual Deployment)
-
-```bash
-# For production with multiple workers
-uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 4
-```
+1. Push your code to GitHub/GitLab
+2. Create a new Web Service on [Render Dashboard](https://dashboard.render.com/)
+3. Configure:
+   - **Build Command:** `./build.sh`
+   - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Python Version:** 3.11.0
+4. Set environment variables (`OPENAI_API_KEY`, `GOOGLE_API_KEY`)
+5. Deploy
 
 ### Using Docker
 
 ```bash
-# Build image
 docker build -t refactorgpt .
-
-# Run container
 docker run -p 8000:8000 --env-file .env refactorgpt
 ```
 
 ### Using Heroku
 
 ```bash
-# Login to Heroku
 heroku login
-
-# Create app
 heroku create your-app-name
-
-# Set environment variables
 heroku config:set OPENAI_API_KEY=your_key_here
 heroku config:set GOOGLE_API_KEY=your_key_here
-
-# Deploy
 git push heroku main
 ```
 
-### Environment Variables for Production
-
-Make sure to set these in your deployment platform:
-- `OPENAI_API_KEY` - Required for OpenAI GPT refactoring
-- `GOOGLE_API_KEY` - Optional, for Google Gemini refactoring
-- `PORT` - Automatically set by most platforms (Render, Heroku, etc.)
+---
 
 ## Tech Stack
 
 - **Backend**: FastAPI, Python 3.10+
 - **LLM SDKs**: OpenAI, Google Generative AI
 - **Code Formatting**: Black, autopep8
+- **Static Analysis**: pylint, radon
 - **Data Validation**: Pydantic
 - **Frontend**: HTML, CSS, JavaScript with Highlight.js
 
